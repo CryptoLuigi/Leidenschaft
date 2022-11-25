@@ -116,7 +116,9 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    if (f"{message.channel}") == banchannel:
+    if (f"{message.channel}") == banchannel:    
+        if message.content.startswith("!rank"):
+            await message.channel.send(f"`!rank` has been discontinued on the server.\nPlease use {bot.user.mention}'s </rank:1029756764092121098> command.")
         return
     else:
             try:
