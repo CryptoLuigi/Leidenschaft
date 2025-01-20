@@ -22,16 +22,16 @@ async def on_ready():
     print("Ready! Let's go...")
 
 level_roles = [
-    (5, 9, "Farmer (level 5)"),
-    (10, 14, "Soldier (level 10)"),
-    (15, 19, "Craftsman (level 15)"),
-    (20, 24, "Merchant (level 20)"),
-    (25, 29, "Mayor (level 25)"),
-    (30, 34, "Shrine Maiden (level 30)"),
-    (35, 39, "Noble (level 35)"),
-    (40, 49, "Aub (level 40)"),
-    (50, 59, "Zent (level 50)"),
-    (60, 2000000, "Goddess (level 60)"),
+    (5, 9, "Farmer (Level 5)"),
+    (10, 14, "Soldier (Level 10)"),
+    (15, 19, "Craftsman (Level 15)"),
+    (20, 24, "Merchant (Level 20)"),
+    (25, 29, "Mayor (Level 25)"),
+    (30, 34, "Shrine Maiden (Level 30)"),
+    (35, 39, "Noble (Level 35)"),
+    (40, 49, "Aub (Level 40)"),
+    (50, 59, "Zent (Level 50)"),
+    (60, 2000000, "Goddess (Level 60)"),
 ]
 
 def get_cur_and_prev_role_names_for(level: int) -> tuple[str, list[str]]:
