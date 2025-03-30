@@ -1,11 +1,17 @@
-import time, nextcord, random, cooldowns, os
-from nextcord.ext import commands
+import os
+import random
+import time
+from enum import Enum
+
+import cooldowns
+import nextcord
+from cooldowns import Cooldown
 from databases import Database
+from dotenv import load_dotenv
+from nextcord.ext import commands
+
 from dislevel import init_dislevel
 from dislevel.utils import update_xp
-from cooldowns import Cooldown
-from dotenv import load_dotenv
-from enum import Enum
 
 load_dotenv()
 intents = nextcord.Intents.all()
@@ -43,24 +49,48 @@ def get_cur_and_prev_role_names_for(level: int) -> tuple[str, list[str]]:
             return (role_name, prev_roles)
         prev_roles.append(role_name)
     assert False, "Not possible"
-    
+
 
 @bot.event
 async def on_dislevel_levelup(guild_id, member_id, level):
-    guild = bot.get_guild(guild_id)
-    member = guild.get_member(member_id)
+    print(f"Level up event triggered for member {member_id} in guild {guild_id} to level {level}")
 
-    print(f"{member} leveled up")
-    
-    role_name, prev_roles = get_cur_and_prev_role_names_for(level)
-    if not role_name: # No role is returned, < lvl 5
+    guild = bot.get_guild(guild_id)
+    if not guild:
+        print(f"Guild with ID {guild_id} not found.")
         return
-    
+
+    member = guild.get_member(member_id)
+    if not member:
+        print(f"Member with ID {member_id} not found.")
+        return
+
+    print(f"{member} leveled up to level {level}")
+
+    role_name, prev_roles = get_cur_and_prev_role_names_for(level)
+    print(f"Role calculation for {member}: current role={role_name}, previous roles={prev_roles}")
+
+    if not role_name: # No role is returned, < lvl 5
+        print(f"No role assigned for {member} at level {level} (below level 5)")
+        return
+
     role_obj = nextcord.utils.get(guild.roles, name=role_name)
+    if not role_obj:
+        print(f"Role with name {role_name} not found.")
+        return
+
+    print(f"Adding role {role_name} to {member}")
     await member.add_roles(role_obj)
+
     for role in prev_roles:
         role_obj = nextcord.utils.get(guild.roles, name=role)
+        if not role_obj:
+            print(f"Role with name {role} not found.")
+            continue
+        print(f"Removing previous role {role} from {member}")
         await member.remove_roles(role_obj)
+
+    print(f"Level up processing complete for {member}")
 
 
 class CooldownBucket(Enum):
@@ -68,7 +98,7 @@ class CooldownBucket(Enum):
     def process(self, *args, **kwargs):
         return args[0].author.id
 
-cooldown = Cooldown(1, 60, CooldownBucket.message_author)
+cooldown = Cooldown(1, 1, CooldownBucket.message_author)
 
 @bot.event
 async def on_message(message):
@@ -83,11 +113,11 @@ async def on_message(message):
         try:
             async with cooldown(message):
                 last_executed = time.time()
-                expvalue = random.randint(15,25)      
+                expvalue = random.randint(15,25)
                 await update_xp(bot, message.author.id, message.guild.id, last_message=last_executed, amount=expvalue)
         except cooldowns.CallableOnCooldown:
             guild = bot.get_guild(message.guild.id)
-            member = guild.get_member(message.author.id)                
+            member = guild.get_member(message.author.id)
             print(f'{member} is cooldown')
     #await bot.process_commands(message)
 
