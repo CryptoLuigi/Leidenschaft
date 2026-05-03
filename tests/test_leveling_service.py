@@ -20,11 +20,11 @@ def test_get_role_name_for_level(load_source_module):
     service = load_source_module("test_leveling_service_roles", "dislevel/leveling_service.py")
 
     assert service.get_role_name_for_level(4) == ""
-    assert service.get_role_name_for_level(35) == "High Bishop (Level 35)"
-    assert service.get_role_name_for_level(39) == "High Bishop (Level 35)"
-    assert service.get_role_name_for_level(40) == ""
+    assert service.get_role_name_for_level(35) == "High Bishop (Level 30)"
+    assert service.get_role_name_for_level(39) == "High Bishop (Level 30)"
+    assert service.get_role_name_for_level(40) == "Noble (Level 40)"
     assert service.get_role_name_for_level(70) == "Zent (Level 70)"
-    assert service.get_role_name_for_level(80) == "Zent (Level 70)"
+    assert service.get_role_name_for_level(80) == "Divine Avatar (Level 80)"
 
 
 def test_build_leveling_state_clamps_negative_xp(load_source_module):
@@ -73,12 +73,12 @@ async def test_sync_level_roles_removes_higher_roles(load_source_module, monkeyp
     nextcord_module.utils = types.SimpleNamespace(get=fake_get)
     monkeypatch.setitem(sys.modules, "nextcord", nextcord_module)
 
-    high_bishop = Role("High Bishop (Level 35)")
+    high_bishop = Role("High Bishop (Level 30)")
     zent = Role("Zent (Level 70)")
     guild = Guild([high_bishop, zent])
     member = Member([zent])
 
     await service.sync_level_roles(guild, member, 35)
 
-    assert member.added == ["High Bishop (Level 35)"]
+    assert member.added == ["High Bishop (Level 30)"]
     assert member.removed == ["Zent (Level 70)"]

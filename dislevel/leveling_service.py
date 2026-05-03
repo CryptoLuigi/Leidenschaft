@@ -7,8 +7,18 @@ if TYPE_CHECKING:
 
 
 LEVEL_ROLES = (
-    (35, 39, "High Bishop (Level 35)"),
-    (70, 2_000_000, "Zent (Level 70)"),
+    (5, 9, "Farmer (Level 5)"),
+    (10, 14, "Soldier (Level 10)"),
+    (15, 19, "Craftsman (Level 15)"),
+    (20, 24, "Merchant (Level 20)"),
+    (25, 29, "Shrine Maiden (Level 25)"),
+    (30, 39, "High Bishop (Level 30)"),
+    (40, 49, "Noble (Level 40)"),
+    (50, 59, "Archduke Candidate (Level 50)"),
+    (60, 69, "Aub (Level 60)"),
+    (70, 79, "Zent (Level 70)"),
+    (80, 99, "Divine Avatar (Level 80)"),
+    (100, 2_000_000, "Goddess (Level 100)"),
 )
 
 
