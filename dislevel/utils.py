@@ -1,6 +1,7 @@
 import os
 import random
 import re
+import time
 from math import ceil
 from typing import List, Union
 
@@ -11,8 +12,11 @@ from dislevel._models import Field
 from dislevel.card import get_card
 from dislevel.leveling_service import (
     change_member_xp,
+    get_random_blessing_xp,
+    should_grant_random_blessing,
     get_xp_before_level,
     get_xp_for_next_level,
+    sync_level_roles,
 )
 from dislevel.minicard import get_leadercard
 from easy_pil.utils import run_in_executor
@@ -61,6 +65,21 @@ async def prepare_db(database, additional_fields: List[Field] = list()) -> None:
 
     try:
         await database.execute(schema)
+    except Exception as e:
+        print(e)
+
+    prayer_claims_table = "daily_prayer_claims"
+    prayer_claims_schema = f"""
+    CREATE TABLE IF NOT EXISTS {prayer_claims_table}(
+        id BIGSERIAL PRIMARY KEY,
+        member_id BIGINT NOT NULL,
+        guild_id BIGINT NOT NULL,
+        claimed_at NUMERIC NOT NULL
+    )
+    """
+
+    try:
+        await database.execute(prayer_claims_schema)
     except Exception as e:
         print(e)
 
@@ -179,7 +198,20 @@ async def update_xp(bot, member_id: int, guild_id: int, last_message: float, amo
     guild = bot.get_guild(guild_id)
     member = await guild.fetch_member(member_id)
     print(f"{member} gained {amount} exp")
-    await add_xp(bot, member_id, guild_id, amount=amount, last_message=last_message)
+    result = await add_xp(bot, member_id, guild_id, amount=amount, last_message=last_message)
+
+    if should_grant_random_blessing(result["level"]):
+        blessing_amount = get_random_blessing_xp()
+        blessing_result = await add_xp(
+            bot,
+            member_id,
+            guild_id,
+            amount=blessing_amount,
+        )
+        result = blessing_result
+        await announce_random_blessing(bot, guild, member, blessing_amount)
+
+    await sync_level_roles(guild, member, result["level"])
 
 
 async def add_xp(bot, member_id: int, guild_id: int, amount: int, last_message: float | None = None) -> dict[str, int]:
@@ -750,4 +782,82 @@ async def set_setting(bot, guild_id: int, name, value:str) -> None:
         VALUES  (:guild_id, :name, :value)
         """,
         {"guild_id": guild_id, "name": name, "value": value,},
+    )
+
+
+async def get_daily_prayer_claim(bot, member_id: int, guild_id: int) -> Union[dict, None]:
+    database = bot.dislevel_database
+
+    data = await database.fetch_one(
+        """
+        SELECT  claimed_at
+        FROM    daily_prayer_claims
+        WHERE   guild_id = :guild_id
+        AND     member_id = :member_id
+        """,
+        {"guild_id": guild_id, "member_id": member_id},
+    )
+
+    if not data:
+        return None
+
+    return dict(data)
+
+
+async def set_daily_prayer_claim(bot, member_id: int, guild_id: int, claimed_at: float) -> None:
+    database = bot.dislevel_database
+    existing_claim = await get_daily_prayer_claim(bot, member_id, guild_id)
+
+    if existing_claim:
+        await database.execute(
+            """
+            UPDATE  daily_prayer_claims
+            SET     claimed_at = :claimed_at
+            WHERE   guild_id = :guild_id
+            AND     member_id = :member_id
+            """,
+            {
+                "claimed_at": claimed_at,
+                "guild_id": guild_id,
+                "member_id": member_id,
+            },
+        )
+        return
+
+    await database.execute(
+        """
+        INSERT  INTO daily_prayer_claims
+                (member_id, guild_id, claimed_at)
+        VALUES  (:member_id, :guild_id, :claimed_at)
+        """,
+        {
+            "member_id": member_id,
+            "guild_id": guild_id,
+            "claimed_at": claimed_at,
+        },
+    )
+
+
+def get_prayer_cooldown_remaining(claimed_at: float, now: float | None = None) -> int:
+    current_time = now if now is not None else time.time()
+    return max(0, int((claimed_at + 86_400) - current_time))
+
+
+async def announce_random_blessing(bot, guild, member, amount: int) -> None:
+    botchannel = await get_setting(bot, guild.id, name="botchannel")
+    if not botchannel:
+        return
+
+    channel_id = int(botchannel[0])
+    channel = guild.get_channel(channel_id)
+    if channel is None:
+        try:
+            channel = await bot.fetch_channel(channel_id)
+        except Exception:
+            return
+
+    await channel.send(
+        "# <:Leidenschaft_God_of_Fire:1377024412099936256> Leidenschaft Blessing\n"
+        f"{member.mention} has received a divine blessing from <@&1036433885367640076> "
+        f"and awarded **{amount} XP**! <:Myne_kami_ni_inoriyo:946120160371171390>"
     )

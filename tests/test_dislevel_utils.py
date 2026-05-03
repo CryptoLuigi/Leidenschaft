@@ -33,8 +33,9 @@ async def test_prepare_db_creates_expected_tables(
 
     await utils.prepare_db(database, extra_fields)
 
-    assert len(database.statements) == 2
+    assert len(database.statements) == 3
     assert "CREATE TABLE IF NOT EXISTS dislevel_data(" in database.statements[0]
+    assert "CREATE TABLE IF NOT EXISTS daily_prayer_claims(" in database.statements[1]
     assert "member_id BIGINT NOT NULL" in database.statements[0]
     assert "bio TEXT" in database.statements[0]
-    assert "CREATE TABLE IF NOT EXISTS server_settings(" in database.statements[1]
+    assert "CREATE TABLE IF NOT EXISTS server_settings(" in database.statements[2]

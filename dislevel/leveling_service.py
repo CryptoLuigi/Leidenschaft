@@ -1,4 +1,5 @@
 import os
+import random
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -69,6 +70,22 @@ def calculate_level_from_xp(total_xp: int) -> int:
 def build_leveling_state(total_xp: int) -> LevelingState:
     clamped_xp = max(0, total_xp)
     return LevelingState(xp=clamped_xp, level=calculate_level_from_xp(clamped_xp))
+
+
+def get_random_blessing_odds(level: int) -> int:
+    if level < 10:
+        return 5_000
+    if level < 50:
+        return 1_000
+    return 500
+
+
+def should_grant_random_blessing(level: int) -> bool:
+    return random.randint(1, get_random_blessing_odds(level)) == 1
+
+
+def get_random_blessing_xp() -> int:
+    return random.randint(5_000, 10_000)
 
 
 async def sync_level_roles(guild: "Guild", member: "Member", level: int) -> None:

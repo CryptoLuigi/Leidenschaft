@@ -36,6 +36,16 @@ def test_build_leveling_state_clamps_negative_xp(load_source_module):
     assert state.level == 0
 
 
+def test_random_blessing_thresholds(load_source_module):
+    service = load_source_module("test_leveling_service_blessing", "dislevel/leveling_service.py")
+
+    assert service.get_random_blessing_odds(0) == 5_000
+    assert service.get_random_blessing_odds(9) == 5_000
+    assert service.get_random_blessing_odds(10) == 1_000
+    assert service.get_random_blessing_odds(49) == 1_000
+    assert service.get_random_blessing_odds(50) == 500
+
+
 @pytest.mark.asyncio
 async def test_sync_level_roles_removes_higher_roles(load_source_module, monkeypatch):
     service = load_source_module("test_leveling_service_sync", "dislevel/leveling_service.py")

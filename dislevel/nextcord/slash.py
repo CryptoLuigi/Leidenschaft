@@ -245,6 +245,91 @@ class LevelingSlash(commands.Cog):
             embed=embed1, view=warnview1, ephemeral=True
         )
 
+    @slash_command(name="give-xp", description="Give XP to a user")
+    @application_checks.has_permissions(moderate_members=True)
+    async def give_xp_command(self, interaction: Interaction, member: Member, amount: int):
+        if amount <= 0:
+            await interaction.response.send_message(
+                ephemeral=True,
+                content="Amount must be greater than 0.",
+            )
+            return
+
+        result = await add_xp(self.bot, member.id, interaction.guild.id, amount)
+        guild = self.bot.get_guild(interaction.guild.id)
+        target_member = guild.get_member(member.id) if guild else member
+        await sync_level_roles(guild, target_member, result["level"])
+        await interaction.response.send_message(
+            ephemeral=True,
+            content=f"Gave **{amount} XP** to {member.mention}.",
+        )
+
+    @slash_command(name="remove-xp", description="Remove XP from a user")
+    @application_checks.has_permissions(moderate_members=True)
+    async def remove_xp_command(self, interaction: Interaction, member: Member, amount: int):
+        if amount <= 0:
+            await interaction.response.send_message(
+                ephemeral=True,
+                content="Amount must be greater than 0.",
+            )
+            return
+
+        result = await remove_xp(self.bot, member.id, interaction.guild.id, amount)
+        guild = self.bot.get_guild(interaction.guild.id)
+        target_member = guild.get_member(member.id) if guild else member
+        await sync_level_roles(guild, target_member, result["level"])
+        await interaction.response.send_message(
+            ephemeral=True,
+            content=f"Removed **{amount} XP** from {member.mention}.",
+        )
+
+    @slash_command(description="Offer a daily prayer for XP")
+    async def pray(self, interaction: Interaction):
+        botchannel = await get_setting(
+            self.bot, interaction.guild_id, name="botchannel"
+        )
+        current_channel = interaction.channel.id if interaction.channel else 0
+
+        if not botchannel or current_channel != int(botchannel[0]):
+            await interaction.response.send_message(
+                ephemeral=True,
+                content=f"{interaction.user.mention} This can only be used in <#{botchannel[0]}>",
+            )
+            return
+
+        claim = await get_daily_prayer_claim(
+            self.bot,
+            interaction.user.id,
+            interaction.guild.id,
+        )
+        if claim:
+            remaining = get_prayer_cooldown_remaining(float(claim["claimed_at"]))
+            if remaining > 0:
+                retry_at = int(float(claim["claimed_at"]) + 86_400)
+                await interaction.response.send_message(
+                    ephemeral=True,
+                    content=f"You can pray again <t:{retry_at}:R>.",
+                )
+                return
+
+        amount = 300
+        result = await add_xp(self.bot, interaction.user.id, interaction.guild.id, amount)
+        guild = self.bot.get_guild(interaction.guild.id)
+        member = guild.get_member(interaction.user.id) if guild else interaction.user
+        await sync_level_roles(guild, member, result["level"])
+        await set_daily_prayer_claim(
+            self.bot,
+            interaction.user.id,
+            interaction.guild.id,
+            time.time(),
+        )
+        await interaction.response.send_message(
+            content=(
+                f"Your prayers have been heard **{interaction.user.display_name}**. "
+                f"You received your daily **{amount} XP**."
+            )
+        )
+
     @slash_command(description="Get help from Leidenschaft")
     async def help_leidenschaft(self, interaction: Interaction):
 
