@@ -9,6 +9,11 @@ from nextcord.ui import Button, View
 
 from dislevel._models import Field
 from dislevel.card import get_card
+from dislevel.leveling_service import (
+    change_member_xp,
+    get_xp_before_level,
+    get_xp_for_next_level,
+)
 from dislevel.minicard import get_leadercard
 from easy_pil.utils import run_in_executor
 
@@ -97,14 +102,8 @@ def get_percentage(data):
     user_xp = data["xp"]
     user_level = data["level"]
 
-    min_xp = 0
-    var_level = 0
-    for i in range(0 , user_level):
-
-        min_xp = min_xp + (5*(var_level**2)+(50*var_level)+100)
-        var_level = var_level + 1
-
-    next_level_xp = 5*(user_level**2)+(50*user_level)+100
+    min_xp = get_xp_before_level(user_level)
+    next_level_xp = get_xp_for_next_level(user_level)
     xp_required = next_level_xp
     xp_have = user_xp - min_xp
 
@@ -177,92 +176,39 @@ async def get_member_position(bot, member_id: int, guild_id: int):
 
 async def update_xp(bot, member_id: int, guild_id: int, last_message: float, amount: int = 0) -> None:
     """Increate xp of a member"""
-    database = bot.dislevel_database
-    leveling_table = os.environ.get("DISLEVEL_TABLE")
-    user_data = await get_member_data(bot, member_id, guild_id)
-
     guild = bot.get_guild(guild_id)
     member = await guild.fetch_member(member_id)
-
-    COOLDOWN_AMOUNT = 60
-    new_time=last_message+COOLDOWN_AMOUNT
     print(f"{member} gained {amount} exp")
-    if user_data:
-        level = user_data["level"]
-        new_xp = user_data["xp"] + amount
+    await add_xp(bot, member_id, guild_id, amount=amount, last_message=last_message)
 
-        var_level = 0
-        levelm = level + 1
-        m_xp = new_xp
-        for i in range(0, levelm):
-            m_xp = m_xp - (5*(var_level**2)+(50*var_level)+100)
-            if m_xp <= 0:
-                break
-            var_level = var_level + 1
-        new_level = var_level
 
-        await database.execute(
-            f"""
-            UPDATE  {leveling_table}
-                SET  xp = :xp,
-                    level = :level
-                WHERE  member_id = :member_id
-                AND  guild_id = :guild_id
-            """,
-            {
-                "xp": new_xp,
-                "level": new_level,
-                "guild_id": guild_id,
-                "member_id": member_id,
-            },
-        )
-        await database.execute(
-            f"""
-            UPDATE  {leveling_table}
-                SET  last_message = :last_message
-                WHERE  member_id = :member_id
-                AND  guild_id = :guild_id
-            """,
-            {
-                "last_message": new_time,
-                "guild_id": guild_id,
-                "member_id": member_id,
-            },
-        )
+async def add_xp(bot, member_id: int, guild_id: int, amount: int, last_message: float | None = None) -> dict[str, int]:
+    """Add xp to a member and recalculate their level."""
+    return await change_member_xp(
+        bot,
+        member_id,
+        guild_id,
+        amount,
+        last_message=last_message,
+    )
 
-        if new_level > level:
-            bot.dispatch(
-                "dislevel_levelup",
-                guild_id=guild_id,
-                member_id=member_id,
-                level=new_level,
-            )
 
-    else:
-        var_level = 0
-        levelm = 1
-        amountm = amount
-        for i in range(0, levelm):
-            amountm = amountm - (5*(var_level**2)+(50*var_level)+100)
-            if amountm <= 0:
-                break
-            var_level = var_level + 1
+async def remove_xp(bot, member_id: int, guild_id: int, amount: int) -> dict[str, int]:
+    """Remove xp from a member and recalculate their level."""
+    return await change_member_xp(bot, member_id, guild_id, -abs(amount), dispatch_levelup=False)
 
-        level = var_level
 
-        await database.execute(
-            f"""
-            INSERT  INTO {leveling_table}
-                    (member_id, guild_id, xp, level)
-            VALUES  (:member_id, :guild_id, :xp, :level)
-            """,
-            {
-                "xp": amount,
-                "level": level,
-                "guild_id": guild_id,
-                "member_id": member_id,
-            },
-        )
+async def set_xp(bot, member_id: int, guild_id: int, amount: int) -> dict[str, int]:
+    """Set a member's total xp directly and recalculate their level."""
+    user_data = await get_member_data(bot, member_id, guild_id)
+    current_xp = user_data["xp"] if user_data else 0
+    return await change_member_xp(
+        bot,
+        member_id,
+        guild_id,
+        amount - current_xp,
+        dispatch_levelup=False,
+    )
 
 async def delete_member_data(bot, member_id: int, guild_id: int) -> None:
     """Deletes a member's data. Usefull when you want to delete member's data if they leave server"""
@@ -361,38 +307,7 @@ async def toggle_nick(bot, member_id: int, guild_id: int, state:int) -> None:
 
 async def reset_rank(bot, member_id: int, guild_id: int) -> None:
     """Reset Rank of a user"""
-    database = bot.dislevel_database
-    leveling_table = os.environ.get("DISLEVEL_TABLE")
-    xp = 0
-    level = 0
-
-    await database.execute(
-            f"""
-            UPDATE  {leveling_table}
-                SET  xp = :xp
-                WHERE  member_id = :member_id
-                AND  guild_id = :guild_id
-            """,
-            {
-                "xp": xp,
-                "guild_id": guild_id,
-                "member_id": member_id,
-            },
-    )
-
-    await database.execute(
-            f"""
-            UPDATE  {leveling_table}
-                SET  level = :level
-                WHERE  member_id = :member_id
-                AND  guild_id = :guild_id
-            """,
-            {
-                "level": level,
-                "guild_id": guild_id,
-                "member_id": member_id,
-            },
-    )
+    await set_xp(bot, member_id, guild_id, 0)
 
 async def set_text_font(bot, member_id: int, guild_id: str, font) -> None:
     """Set text color"""

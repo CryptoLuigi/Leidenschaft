@@ -28,7 +28,7 @@ def get_card(data, nick:str|None, bg:str):
         except Exception as e:
             bg_image = load_image(bg)
     else:
-        bg_image = pyproload_image(bg)
+        bg_image = load_image(bg)
 
     background = Editor(bg_image).resize((800, 240), crop=True)
 
