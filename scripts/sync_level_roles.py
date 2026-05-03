@@ -33,7 +33,6 @@ def parse_breakpoint(spec: str) -> tuple[int, int]:
     min_level = int(min_level_text.strip())
     max_level_raw = max_level_text.strip().lower()
     max_level = 2_000_000 if max_level_raw == "inf" else int(max_level_raw)
-    role_name = role_name.strip()
 
     if min_level < 0:
         raise argparse.ArgumentTypeError("Breakpoint minimum level cannot be negative.")
