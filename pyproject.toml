@@ -3,7 +3,7 @@ name = "leidenschaft"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11,<3.12"
 dependencies = [
     "databases>=0.9.0",
     "function-cooldowns>=2.0.1",
@@ -13,7 +13,16 @@ dependencies = [
     "numerize>=0.12",
     "mee6-py-api>=0.0.1",
     "aiosqlite>=0.21.0",
-    "pillow>=8.3.1,<=8.4.1",
     "requests>=2.26.0",
     "aiohttp>=3.6.0",
+    "pillow>=12.2.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.0",
+    "pytest-asyncio>=1.1.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

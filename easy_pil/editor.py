@@ -46,7 +46,7 @@ class Editor:
 
         return _bytes
 
-    def resize(self, size: Tuple[float, float], crop=False) -> Editor:
+    def resize(self, size: Tuple[int, int], crop=False) -> Editor:
         """Resize image
 
         Parameters
@@ -57,7 +57,7 @@ class Editor:
             Crop the image to bypass distortion, by default False
         """
         if not crop:
-            self.image = self.image.resize(size, Image.ANTIALIAS)
+            self.image = self.image.resize(size, Image.Resampling.LANCZOS)
 
         else:
             width, height = self.image.size
@@ -76,7 +76,7 @@ class Editor:
                 resize = (0, offset, width, height - offset)
 
             self.image = self.image.crop(resize).resize(
-                (ideal_width, ideal_height), Image.ANTIALIAS
+                (ideal_width, ideal_height), Image.Resampling.LANCZOS
             )
 
         return self
@@ -207,7 +207,7 @@ class Editor:
         self,
         position: Tuple[float, float],
         text: str,
-        font: Union[ImageFont.FreeTypeFont, Font] = None,
+        font: Union[ImageFont.FreeTypeFont, Font, None] = None,
         color: Color = "black",
         align: Literal["left", "center", "right"] = "left",
     ) -> Editor:
@@ -265,7 +265,7 @@ class Editor:
             total_width = 0
 
             for text in texts:
-                total_width += text.font.getsize(text.text)[0]
+                total_width += text.getlength()
 
             position = (position[0] - total_width, position[1])
 
@@ -273,7 +273,7 @@ class Editor:
             total_width = 0
 
             for text in texts:
-                total_width += text.font.getsize(text.text)[0]
+                total_width += text.getlength()
 
             position = (position[0] - (total_width / 2), position[1])
 
@@ -283,12 +283,9 @@ class Editor:
             color = text.color
 
             if space_separated:
-                width, _ = (
-                    font.getsize(sentence)[0] + font.getsize(" ")[0],
-                    font.getsize(sentence)[1],
-                )
+                width = font.getlength(sentence + " ")
             else:
-                width, _ = font.getsize(sentence)
+                width = font.getlength(sentence)
 
             draw.text(position, sentence, color, font=font, anchor="lm")
             position = (position[0] + width, position[1])

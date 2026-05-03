@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 
 from typing_extensions import Literal
 
@@ -12,9 +12,9 @@ async def init_dislevel(
     bot,
     database,
     driver: Literal["asyncpg", "databases"] = "databases",
-    table_name: str = None,
+    table_name: Optional[str] = None,
     additional_fields: List[Field] = list(),
-    leaderboard_icon_url: str = None,
+    leaderboard_icon_url: Optional[str] = None,
 ):
     if driver == "asyncpg":
         database = DbAdapter(database)

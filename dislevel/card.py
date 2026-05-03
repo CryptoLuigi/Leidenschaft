@@ -6,14 +6,14 @@ from easy_pil import Canvas, Editor, Font, load_image
 
 URL_REGEX = re.compile(r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)")
 
-def get_card(data, nick:str, bg:str):
+def get_card(data, nick:str|None, bg:str):
     profile_image = load_image(data["profile_image"])
     profile = Editor(profile_image).resize((200, 200))
     overlay_state=(data["overlay"])
     tcolor=(data["text_color"])
     tcolor2=(data["text_color2"])
     tcolor3=(data["text_color3"])
-    font=(data["font"])
+    font: int =(data["font"])
 
     if tcolor == None:
         tcolor = "white"

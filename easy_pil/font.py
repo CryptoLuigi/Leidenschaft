@@ -23,73 +23,73 @@ fonts_path = {
         "italic": os.path.join(fonts_directory, "poppins", "poppins_italic.ttf"),
         "light": os.path.join(fonts_directory, "poppins", "poppins_light.ttf"),
     },
-        "arial": {
+    "arial": {
         "regular": os.path.join(fonts_directory, "arial", "arial.ttf"),
         "bold": os.path.join(fonts_directory, "arial", "arial.ttf"),
         "italic": os.path.join(fonts_directory, "arial", "arial.ttf"),
         "light": os.path.join(fonts_directory, "arial", "arial.ttf"),
     },
-        "noto sans": {
+    "noto sans": {
         "regular": os.path.join(fonts_directory, "notosans", "NotoSans-Medium.ttf"),
         "bold": os.path.join(fonts_directory, "notosans", "NotoSans-Bold.ttf"),
         "italic": os.path.join(fonts_directory, "notosans", "NotoSans-Italic.ttf"),
         "light": os.path.join(fonts_directory, "notosans", "NotoSans-Light.ttf"),
     },
-        "msgothic": {
+    "msgothic": {
         "regular": os.path.join(fonts_directory, "msgothic", "msgothic.ttc"),
         "bold": os.path.join(fonts_directory, "msgothic", "msgothic.ttc"),
         "italic": os.path.join(fonts_directory, "msgothic", "msgothic.ttc"),
         "light": os.path.join(fonts_directory, "msgothic", "msgothic.ttc"),
     },
-        "PRISTINA": {
+    "PRISTINA": {
         "regular": os.path.join(fonts_directory, "PRISTINA", "PRISTINA.ttf"),
         "bold": os.path.join(fonts_directory, "PRISTINA", "PRISTINA.ttf"),
         "italic": os.path.join(fonts_directory, "PRISTINA", "PRISTINA.ttf"),
         "light": os.path.join(fonts_directory, "PRISTINA", "PRISTINA.ttf"),
     },
-        "OLDENGL": {
+    "OLDENGL": {
         "regular": os.path.join(fonts_directory, "OLDENGL", "OLDENGL.ttf"),
         "bold": os.path.join(fonts_directory, "OLDENGL", "OLDENGL.ttf"),
         "italic": os.path.join(fonts_directory, "OLDENGL", "OLDENGL.ttf"),
         "light": os.path.join(fonts_directory, "OLDENGL", "OLDENGL.ttf"),
     },
-        "Redressed": {
+    "Redressed": {
         "regular": os.path.join(fonts_directory, "Redressed", "Redressed.ttf"),
         "bold": os.path.join(fonts_directory, "Redressed", "Redressed.ttf"),
         "italic": os.path.join(fonts_directory, "Redressed", "Redressed.ttf"),
         "light": os.path.join(fonts_directory, "Redressed", "Redressed.ttf"),
     },
-        "NotoSansJP": {
+    "NotoSansJP": {
         "regular": os.path.join(fonts_directory, "NotoSansJP", "NotoSansJP.otf"),
         "bold": os.path.join(fonts_directory, "NotoSansJP", "NotoSansJP.otf"),
         "italic": os.path.join(fonts_directory, "NotoSansJP", "NotoSansJP.otf"),
         "light": os.path.join(fonts_directory, "NotoSansJP", "NotoSansJP.otf"),
     },
-        "NotoSerif": {
+    "NotoSerif": {
         "regular": os.path.join(fonts_directory, "NotoSerif", "NotoSerif.ttf"),
         "bold": os.path.join(fonts_directory, "NotoSerif", "NotoSerif.ttf"),
         "italic": os.path.join(fonts_directory, "NotoSerif", "NotoSerif.ttf"),
         "light": os.path.join(fonts_directory, "NotoSerif", "NotoSerif.ttf"),
     },
-        "Roboto": {
+    "Roboto": {
         "regular": os.path.join(fonts_directory, "Roboto", "Roboto.ttf"),
         "bold": os.path.join(fonts_directory, "Roboto", "Roboto.ttf"),
         "italic": os.path.join(fonts_directory, "Roboto", "Roboto.ttf"),
         "light": os.path.join(fonts_directory, "Roboto", "Roboto.ttf"),
     },
-        "NotoSerifJP": {
+    "NotoSerifJP": {
         "regular": os.path.join(fonts_directory, "NotoSerifJP", "NotoSerifJP.otf"),
         "bold": os.path.join(fonts_directory, "NotoSerifJP", "NotoSerifJP.otf"),
         "italic": os.path.join(fonts_directory, "NotoSerifJP", "NotoSerifJP.otf"),
         "light": os.path.join(fonts_directory, "NotoSerifJP", "NotoSerifJP.otf"),
     },
-        "JuergenManuscript": {
+    "JuergenManuscript": {
         "regular": os.path.join(fonts_directory, "JuergenManuscript", "JuergenManuscript.ttf"),
         "bold": os.path.join(fonts_directory, "JuergenManuscript", "JuergenManuscript.ttf"),
         "italic": os.path.join(fonts_directory, "JuergenManuscript", "JuergenManuscript.ttf"),
         "light": os.path.join(fonts_directory, "JuergenManuscript", "JuergenManuscript.ttf"),
     },
-        "JuergenStylo": {
+    "JuergenStylo": {
         "regular": os.path.join(fonts_directory, "JuergenStylo", "JuergenStylo.ttf"),
         "bold": os.path.join(fonts_directory, "JuergenStylo", "JuergenStylo.ttf"),
         "italic": os.path.join(fonts_directory, "JuergenStylo", "JuergenStylo.ttf"),
