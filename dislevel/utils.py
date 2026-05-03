@@ -23,6 +23,7 @@ from easy_pil.utils import run_in_executor
 
 leveling_table: str = None
 
+
 async def prepare_db(database, additional_fields: List[Field] = list()) -> None:
     """Prepares the database for leveling"""
     leveling_table = os.environ.get("DISLEVEL_TABLE")
@@ -83,7 +84,6 @@ async def prepare_db(database, additional_fields: List[Field] = list()) -> None:
     except Exception as e:
         print(e)
 
-
     server_settings_table = "server_settings"
 
     default_fields = [
@@ -117,6 +117,7 @@ async def prepare_db(database, additional_fields: List[Field] = list()) -> None:
     except Exception as e:
         print(e)
 
+
 def get_percentage(data):
     user_xp = data["xp"]
     user_level = data["level"]
@@ -130,6 +131,7 @@ def get_percentage(data):
     data["next_level_xp"] = next_level_xp
 
     return data
+
 
 async def get_member_data(bot, member_id: int, guild_id: int) -> Union[dict, None]:
     """Returns data of an member"""
@@ -151,6 +153,7 @@ async def get_member_data(bot, member_id: int, guild_id: int) -> Union[dict, Non
 
     return get_percentage(dict(data))
 
+
 async def get_leaderboard_data(bot, guild_id: int):
     """Get a guild's leaderboard data"""
     database = bot.dislevel_database
@@ -169,6 +172,7 @@ async def get_leaderboard_data(bot, guild_id: int):
 
     guild_data = [dict(row) for row in data]
     return guild_data
+
 
 async def get_member_position(bot, member_id: int, guild_id: int):
     """Get position of a member"""
@@ -193,12 +197,17 @@ async def get_member_position(bot, member_id: int, guild_id: int):
 
     return position
 
-async def update_xp(bot, member_id: int, guild_id: int, last_message: float, amount: int = 0) -> None:
+
+async def update_xp(
+    bot, member_id: int, guild_id: int, last_message: float, amount: int = 0
+) -> None:
     """Increate xp of a member"""
     guild = bot.get_guild(guild_id)
     member = await guild.fetch_member(member_id)
     print(f"{member} gained {amount} exp")
-    result = await add_xp(bot, member_id, guild_id, amount=amount, last_message=last_message)
+    result = await add_xp(
+        bot, member_id, guild_id, amount=amount, last_message=last_message
+    )
 
     if should_grant_random_blessing(result["level"]):
         blessing_amount = get_random_blessing_xp()
@@ -214,7 +223,9 @@ async def update_xp(bot, member_id: int, guild_id: int, last_message: float, amo
     await sync_level_roles(guild, member, result["level"])
 
 
-async def add_xp(bot, member_id: int, guild_id: int, amount: int, last_message: float | None = None) -> dict[str, int]:
+async def add_xp(
+    bot, member_id: int, guild_id: int, amount: int, last_message: float | None = None
+) -> dict[str, int]:
     """Add xp to a member and recalculate their level."""
     return await change_member_xp(
         bot,
@@ -227,7 +238,9 @@ async def add_xp(bot, member_id: int, guild_id: int, amount: int, last_message: 
 
 async def remove_xp(bot, member_id: int, guild_id: int, amount: int) -> dict[str, int]:
     """Remove xp from a member and recalculate their level."""
-    return await change_member_xp(bot, member_id, guild_id, -abs(amount), dispatch_levelup=False)
+    return await change_member_xp(
+        bot, member_id, guild_id, -abs(amount), dispatch_levelup=False
+    )
 
 
 async def set_xp(bot, member_id: int, guild_id: int, amount: int) -> dict[str, int]:
@@ -241,6 +254,7 @@ async def set_xp(bot, member_id: int, guild_id: int, amount: int) -> dict[str, i
         amount - current_xp,
         dispatch_levelup=False,
     )
+
 
 async def delete_member_data(bot, member_id: int, guild_id: int) -> None:
     """Deletes a member's data. Usefull when you want to delete member's data if they leave server"""
@@ -259,6 +273,7 @@ async def delete_member_data(bot, member_id: int, guild_id: int) -> None:
         },
     )
 
+
 async def set_bg_image(bot, member_id: int, guild_id: int, url) -> None:
     """Set bg image"""
     database = bot.dislevel_database
@@ -274,7 +289,10 @@ async def set_bg_image(bot, member_id: int, guild_id: int, url) -> None:
         {"bg_image": url, "guild_id": guild_id, "member_id": member_id},
     )
 
-async def set_text_color(bot, member_id: int, guild_id: str, color, color2, color3) -> None:
+
+async def set_text_color(
+    bot, member_id: int, guild_id: str, color, color2, color3
+) -> None:
     """Set text color"""
     database = bot.dislevel_database
     leveling_table = os.environ.get("DISLEVEL_TABLE")
@@ -307,7 +325,8 @@ async def set_text_color(bot, member_id: int, guild_id: str, color, color2, colo
         {"text_color3": color3, "guild_id": guild_id, "member_id": member_id},
     )
 
-async def toggle_overlay(bot, member_id: int, guild_id: int, state:int) -> None:
+
+async def toggle_overlay(bot, member_id: int, guild_id: int, state: int) -> None:
     """toggle overlay"""
     database = bot.dislevel_database
     leveling_table = os.environ.get("DISLEVEL_TABLE")
@@ -322,7 +341,8 @@ async def toggle_overlay(bot, member_id: int, guild_id: int, state:int) -> None:
         {"overlay": state, "guild_id": guild_id, "member_id": member_id},
     )
 
-async def toggle_nick(bot, member_id: int, guild_id: int, state:int) -> None:
+
+async def toggle_nick(bot, member_id: int, guild_id: int, state: int) -> None:
     """toggle nickname"""
     database = bot.dislevel_database
     leveling_table = os.environ.get("DISLEVEL_TABLE")
@@ -337,9 +357,11 @@ async def toggle_nick(bot, member_id: int, guild_id: int, state:int) -> None:
         {"nick": state, "guild_id": guild_id, "member_id": member_id},
     )
 
+
 async def reset_rank(bot, member_id: int, guild_id: int) -> None:
     """Reset Rank of a user"""
     await set_xp(bot, member_id, guild_id, 0)
+
 
 async def set_text_font(bot, member_id: int, guild_id: str, font) -> None:
     """Set text color"""
@@ -356,12 +378,17 @@ async def set_text_font(bot, member_id: int, guild_id: str, font) -> None:
         {"font": font, "guild_id": guild_id, "member_id": member_id},
     )
 
-async def get_page(bot, interaction, page:int) -> None:
+
+async def get_page(bot, interaction, page: int) -> None:
     """See the server leaderboard"""
     await interaction.response.defer()
     NextButton = Button(label="Next", style=ButtonStyle.blurple, emoji="⏭")
     PrevButton = Button(label="Previous", style=ButtonStyle.blurple, emoji="⏮")
-    MyRank = Button(label="My Rank", style=ButtonStyle.blurple, emoji="<:praisekami:946117405111898192>")
+    MyRank = Button(
+        label="My Rank",
+        style=ButtonStyle.blurple,
+        emoji="<:praisekami:946117405111898192>",
+    )
     view = View(timeout=600)
     view.add_item(PrevButton)
     view.add_item(MyRank)
@@ -387,7 +414,7 @@ async def get_page(bot, interaction, page:int) -> None:
 
     leaderboard_content = f"This is the {interaction.guild} server's leaderboard.\n\nYou are ranked `{selfrank}`.\n\n"
 
-    last_page = ceil(len(leaderboard_data)/10)
+    last_page = ceil(len(leaderboard_data) / 10)
 
     if page == None or page <= 0:
         page = int(1)
@@ -401,21 +428,27 @@ async def get_page(bot, interaction, page:int) -> None:
 
     async def button_callback(interaction):
         if interaction.user == caller:
-            await get_page(bot, interaction, page=page+1)
+            await get_page(bot, interaction, page=page + 1)
         else:
-            await interaction.response.send_message("Only the caller can do that.", ephemeral=True)
+            await interaction.response.send_message(
+                "Only the caller can do that.", ephemeral=True
+            )
 
     async def button_callback2(interaction):
         if interaction.user == caller:
-            await get_page(bot, interaction, page=page-1)
+            await get_page(bot, interaction, page=page - 1)
         else:
-            await interaction.response.send_message("Only the caller can do that.", ephemeral=True)
+            await interaction.response.send_message(
+                "Only the caller can do that.", ephemeral=True
+            )
 
     async def button_callback3(interaction):
         if interaction.user == caller:
-            await get_page(bot, interaction, page = ceil(selfrank/10))
+            await get_page(bot, interaction, page=ceil(selfrank / 10))
         else:
-            await interaction.response.send_message("Only the caller can do that.", ephemeral=True)
+            await interaction.response.send_message(
+                "Only the caller can do that.", ephemeral=True
+            )
 
     NextButton.callback = button_callback
     PrevButton.callback = button_callback2
@@ -427,46 +460,60 @@ async def get_page(bot, interaction, page:int) -> None:
     leaderboard_image_data = dict()
 
     position = 0
-    for data in leaderboard_data[(((page*10)-10)):(10+((page*10)-10))]:
-            bgnum = random.randint(1, bgmax)
-            memberid = data['member_id']
-            guild = bot.get_guild(interaction.guild.id)
+    for data in leaderboard_data[((page * 10) - 10) : (10 + ((page * 10) - 10))]:
+        bgnum = random.randint(1, bgmax)
+        memberid = data["member_id"]
+        guild = bot.get_guild(interaction.guild.id)
 
-            try:
-                member = await guild.fetch_member(memberid)
-            except:
-                # Left server
-                member = None
+        try:
+            member = await guild.fetch_member(memberid)
+        except:
+            # Left server
+            member = None
 
-            position += 1
-            try:
-                if member.nick == f'None' or member.nick == None:
-                    user = bot.get_user(data["member_id"])
-                    user = re.sub(r'#(.?)(.?)(.?)(.?)', '', f'{user}')
-                    leaderboard_image_data[f"username_{position}"] = user
-                else:
-                    leaderboard_image_data[f"username_{position}"] = member.nick
-            except:
-                    leaderboard_image_data[f"username_{position}"] = memberid
+        position += 1
+        try:
+            if member.nick == f"None" or member.nick == None:
+                user = bot.get_user(data["member_id"])
+                user = re.sub(r"#(.?)(.?)(.?)(.?)", "", f"{user}")
+                leaderboard_image_data[f"username_{position}"] = user
+            else:
+                leaderboard_image_data[f"username_{position}"] = member.nick
+        except:
+            leaderboard_image_data[f"username_{position}"] = memberid
 
-            bg = ["https://dummyimage.com/600x400/fff/fff"]
-            leaderboard_image_data[f"position_{position}"] = position+((page*10)-10)
-            leaderboard_image_data[f"bg_{position}"] = await get_bg_value(bot=bot, guild_id=interaction.guild.id, bgnum=bgnum)
-            leaderboard_image_data[f"profile_image_{position}"] = str(member.display_avatar.url) if member else None
-            leaderboard_image_data[f"xp_{position}"] = data['xp']
-            leaderboard_image_data[f"level_{position}"] = data['level']
-            leaderboard_image_data[f"position_{position}"] = await get_member_position(bot, memberid, interaction.guild.id)
+        bg = ["https://dummyimage.com/600x400/fff/fff"]
+        leaderboard_image_data[f"position_{position}"] = position + ((page * 10) - 10)
+        leaderboard_image_data[f"bg_{position}"] = await get_bg_value(
+            bot=bot, guild_id=interaction.guild.id, bgnum=bgnum
+        )
+        leaderboard_image_data[f"profile_image_{position}"] = (
+            str(member.display_avatar.url) if member else None
+        )
+        leaderboard_image_data[f"xp_{position}"] = data["xp"]
+        leaderboard_image_data[f"level_{position}"] = data["level"]
+        leaderboard_image_data[f"position_{position}"] = await get_member_position(
+            bot, memberid, interaction.guild.id
+        )
 
     image = await run_in_executor(get_leadercard, data=leaderboard_image_data, bg=bg[0])
     file = File(fp=image, filename="card.png")
-    embed = Embed(title=f"Leaderboard", description=f"{leaderboard_content}", color=0x006bb1)
+    embed = Embed(
+        title=f"Leaderboard", description=f"{leaderboard_content}", color=0x006BB1
+    )
     embed.set_image(url="attachment://card.png")
-    embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1029266425862434846/1030948597547663420/80b67817a5b119041027ce242452026a.png")
-    embed.set_footer(text=f"{interaction.guild} Page ({page}/{last_page})", icon_url = interaction.guild.icon)
+    embed.set_thumbnail(
+        url="https://cdn.discordapp.com/attachments/1029266425862434846/1030948597547663420/80b67817a5b119041027ce242452026a.png"
+    )
+    embed.set_footer(
+        text=f"{interaction.guild} Page ({page}/{last_page})",
+        icon_url=interaction.guild.icon,
+    )
     try:
-        await interaction.message.edit(file=file,embed=embed, view=view)
+        await interaction.message.edit(file=file, embed=embed, view=view)
     except:
         await interaction.send(file=file, embed=embed, view=view)
+
 
 async def set_first_run(bot, member_id: int, guild_id: int) -> None:
     """Set first run"""
@@ -485,10 +532,11 @@ async def set_first_run(bot, member_id: int, guild_id: int) -> None:
         {"first_run": firstrun, "guild_id": guild_id, "member_id": member_id},
     )
 
+
 async def get_bg_data(bot, guild_id: int) -> Union[dict, None]:
     """Returns data number of custom bgs"""
     database = bot.dislevel_database
-    name="custom_bg"
+    name = "custom_bg"
 
     data = await database.fetch_one(
         f"""
@@ -505,7 +553,8 @@ async def get_bg_data(bot, guild_id: int) -> Union[dict, None]:
 
     return data
 
-async def get_bg_value(bot, guild_id: int, bgnum:int) -> Union[dict, None]:
+
+async def get_bg_value(bot, guild_id: int, bgnum: int) -> Union[dict, None]:
     """Returns data number of custom bgs"""
     database = bot.dislevel_database
     bgname = f"bg{bgnum}"
@@ -525,10 +574,11 @@ async def get_bg_value(bot, guild_id: int, bgnum:int) -> Union[dict, None]:
 
     return data
 
-async def add_bg_image(bot, guild_id: int, bgmax:int, value:str) -> None:
+
+async def add_bg_image(bot, guild_id: int, bgmax: int, value: str) -> None:
     """Set bg image"""
     database = bot.dislevel_database
-    custom_bg="custom_bg"
+    custom_bg = "custom_bg"
     bgnum = int(bgmax[0])
     bgnum = bgnum + 1
     name = f"bg{bgnum}"
@@ -538,7 +588,11 @@ async def add_bg_image(bot, guild_id: int, bgmax:int, value:str) -> None:
                 (guild_id, name, value)
         VALUES  (:guild_id, :name, :value)
         """,
-        {"guild_id": guild_id, "name": name, "value": value,},
+        {
+            "guild_id": guild_id,
+            "name": name,
+            "value": value,
+        },
     )
 
     await database.execute(
@@ -551,10 +605,13 @@ async def add_bg_image(bot, guild_id: int, bgmax:int, value:str) -> None:
         {"value": bgnum, "guild_id": guild_id, "name": custom_bg},
     )
 
-async def delete_bg_image(bot, guild_id: int, interaction, bgmax:int, name:str) -> None:
+
+async def delete_bg_image(
+    bot, guild_id: int, interaction, bgmax: int, name: str
+) -> None:
     """Deletes a background image from the db"""
     database = bot.dislevel_database
-    custom_bg="custom_bg"
+    custom_bg = "custom_bg"
     bgnum = int(bgmax[0])
     bgnum = bgnum - 1
 
@@ -569,9 +626,10 @@ async def delete_bg_image(bot, guild_id: int, interaction, bgmax:int, name:str) 
     )
 
     if value == None:
-        await interaction.send(ephemeral=True, content=f"Background image does not exist")
+        await interaction.send(
+            ephemeral=True, content=f"Background image does not exist"
+        )
     else:
-
         bgcheck = await database.fetch_one(
             f"""
             SELECT  name
@@ -595,7 +653,7 @@ async def delete_bg_image(bot, guild_id: int, interaction, bgmax:int, name:str) 
         )
 
         bgcheck = str(bgcheck[0])
-        bgcheck = re.sub(r'bg',  '', f'{bgcheck}')
+        bgcheck = re.sub(r"bg", "", f"{bgcheck}")
 
         if bgcheck == bgmax[0]:
             await database.execute(
@@ -646,7 +704,10 @@ async def delete_bg_image(bot, guild_id: int, interaction, bgmax:int, name:str) 
                 {"value": maxvalue[0], "guild_id": guild_id, "name": bgname},
             )
 
-        await interaction.send(ephemeral=True, content=f"Background image has been removed")
+        await interaction.send(
+            ephemeral=True, content=f"Background image has been removed"
+        )
+
 
 async def get_rank(bot, interaction, member) -> None:
     """Gets the rank card for a user"""
@@ -659,13 +720,16 @@ async def get_rank(bot, interaction, member) -> None:
         user_data = await get_member_data(bot, member.id, interaction.guild.id)
         first_run = 1
 
-    mestiid=int(1027592830719377439)
+    mestiid = int(1027592830719377439)
     if member.id == mestiid:
-        await interaction.response.send_message(content=f"https://cdn.discordapp.com/attachments/1028883555713032234/1037415184072982528/card.png")
+        await interaction.response.send_message(
+            content=f"https://cdn.discordapp.com/attachments/1028883555713032234/1037415184072982528/card.png"
+        )
 
     elif first_run == 1:
-
-        user_data["position"] = await get_member_position(bot, member.id, interaction.guild.id)
+        user_data["position"] = await get_member_position(
+            bot, member.id, interaction.guild.id
+        )
         user_data["profile_image"] = str(member.display_avatar.url)
         user_info = str(member).split("#")
         user_data["name"] = user_info[0]
@@ -675,25 +739,33 @@ async def get_rank(bot, interaction, member) -> None:
         # bgmax = int(bgmax[0])
         # bgnum = random.randint(1, bgmax)
         bg = ["https://dummyimage.com/600x400/fff/fff"]
-        image = await run_in_executor(get_card, data=user_data, nick=member.nick, bg=bg[0])
+        image = await run_in_executor(
+            get_card, data=user_data, nick=member.nick, bg=bg[0]
+        )
         file = File(fp=image, filename="card.png")
-        Leaderboard = Button(label="Show the Leaderboard", style=ButtonStyle.green, emoji="<:MyneSparkle:1018941182430154902>")
+        Leaderboard = Button(
+            label="Show the Leaderboard",
+            style=ButtonStyle.green,
+            emoji="<:MyneSparkle:1018941182430154902>",
+        )
         view2 = View(timeout=600)
         view2.add_item(Leaderboard)
 
-
         async def leader_callback(interaction):
-            selfrank = await get_member_position(bot, interaction.user.id, interaction.guild.id)
-            await get_page(bot, interaction, page=ceil(selfrank/10))
+            selfrank = await get_member_position(
+                bot, interaction.user.id, interaction.guild.id
+            )
+            await get_page(bot, interaction, page=ceil(selfrank / 10))
             print(f"Leaderboard Requested by {interaction.user.name}")
 
         Leaderboard.callback = leader_callback
 
-        await interaction.send(file=file,view=view2)
-
+        await interaction.send(file=file, view=view2)
 
     else:
-        user_data["position"] = await get_member_position(bot, member.id, interaction.guild.id)
+        user_data["position"] = await get_member_position(
+            bot, member.id, interaction.guild.id
+        )
         user_data["profile_image"] = str(member.display_avatar.url)
         user_info = str(member).split("#")
         user_data["name"] = user_info[0]
@@ -703,18 +775,28 @@ async def get_rank(bot, interaction, member) -> None:
         # bgmax = int(bgmax[0])
         # bgnum = random.randint(1, bgmax)
         bg = ["https://dummyimage.com/600x400/fff/fff"]
-        image = await run_in_executor(get_card, data=user_data, nick=member.nick, bg=bg[0])
+        image = await run_in_executor(
+            get_card, data=user_data, nick=member.nick, bg=bg[0]
+        )
         file = File(fp=image, filename="card.png")
 
-        ShowButton = Button(label="Show me", style=ButtonStyle.green, emoji="<:praisekami:946117405111898192>")
-        Leaderboard = Button(label="Show the Leaderboard", style=ButtonStyle.green, emoji="<:MyneSparkle:1018941182430154902>")
+        ShowButton = Button(
+            label="Show me",
+            style=ButtonStyle.green,
+            emoji="<:praisekami:946117405111898192>",
+        )
+        Leaderboard = Button(
+            label="Show the Leaderboard",
+            style=ButtonStyle.green,
+            emoji="<:MyneSparkle:1018941182430154902>",
+        )
         view = View(timeout=600)
         view2 = View(timeout=600)
         view.add_item(ShowButton)
         view2.add_item(Leaderboard)
 
         async def button_callback(interaction):
-            ccommands='''
+            ccommands = """
             </setfont:0> Set the font via dropdown menu.
 
             </overlay:0> - Turn off/on the overlay on the rank card.
@@ -733,16 +815,26 @@ async def get_rank(bot, interaction, member) -> None:
 
             </resetcolor:0> - Resets custom colors on your rank card to default.
 
-            '''
-            embed=Embed(title="Help", description="This is the list of commands for <@1029559354673868801>.",color=0x006bb1)
-            embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1029266425862434846/1030948597547663420/80b67817a5b119041027ce242452026a.png?size=4096")
-            embed.add_field(name="Customization Commands:", value=f"{ccommands}", inline=False)
+            """
+            embed = Embed(
+                title="Help",
+                description="This is the list of commands for <@1029559354673868801>.",
+                color=0x006BB1,
+            )
+            embed.set_thumbnail(
+                url="https://cdn.discordapp.com/attachments/1029266425862434846/1030948597547663420/80b67817a5b119041027ce242452026a.png?size=4096"
+            )
+            embed.add_field(
+                name="Customization Commands:", value=f"{ccommands}", inline=False
+            )
 
             await interaction.send(ephemeral=True, embed=embed)
 
         async def leader_callback(interaction):
-            selfrank = await get_member_position(bot, interaction.user.id, interaction.guild.id)
-            page = ceil(selfrank/10)
+            selfrank = await get_member_position(
+                bot, interaction.user.id, interaction.guild.id
+            )
+            page = ceil(selfrank / 10)
             await get_page(bot, interaction, page)
             print(f"Leaderboard Requested by {interaction.user.name}")
 
@@ -750,7 +842,12 @@ async def get_rank(bot, interaction, member) -> None:
         ShowButton.callback = button_callback
         await set_first_run(bot, member.id, interaction.guild.id)
         await interaction.send(file=file, view=view2)
-        await interaction.send(ephemeral=True, content="This is your first time seeing your rank card.\nWould you like to see how to customize your card?\n" , view=view)
+        await interaction.send(
+            ephemeral=True,
+            content="This is your first time seeing your rank card.\nWould you like to see how to customize your card?\n",
+            view=view,
+        )
+
 
 async def get_setting(bot, guild_id: int, name) -> None:
     """Returns data number of custom bgs"""
@@ -771,7 +868,8 @@ async def get_setting(bot, guild_id: int, name) -> None:
 
     return data
 
-async def set_setting(bot, guild_id: int, name, value:str) -> None:
+
+async def set_setting(bot, guild_id: int, name, value: str) -> None:
     """Returns data number of custom bgs"""
     database = bot.dislevel_database
 
@@ -781,11 +879,17 @@ async def set_setting(bot, guild_id: int, name, value:str) -> None:
                 (guild_id, name, value)
         VALUES  (:guild_id, :name, :value)
         """,
-        {"guild_id": guild_id, "name": name, "value": value,},
+        {
+            "guild_id": guild_id,
+            "name": name,
+            "value": value,
+        },
     )
 
 
-async def get_daily_prayer_claim(bot, member_id: int, guild_id: int) -> Union[dict, None]:
+async def get_daily_prayer_claim(
+    bot, member_id: int, guild_id: int
+) -> Union[dict, None]:
     database = bot.dislevel_database
 
     data = await database.fetch_one(
@@ -804,7 +908,9 @@ async def get_daily_prayer_claim(bot, member_id: int, guild_id: int) -> Union[di
     return dict(data)
 
 
-async def set_daily_prayer_claim(bot, member_id: int, guild_id: int, claimed_at: float) -> None:
+async def set_daily_prayer_claim(
+    bot, member_id: int, guild_id: int, claimed_at: float
+) -> None:
     database = bot.dislevel_database
     existing_claim = await get_daily_prayer_claim(bot, member_id, guild_id)
 
@@ -859,5 +965,5 @@ async def announce_random_blessing(bot, guild, member, amount: int) -> None:
     await channel.send(
         "# <:Leidenschaft_God_of_Fire:1377024412099936256> Leidenschaft Blessing\n"
         f"{member.mention} has received a divine blessing from <@&1036433885367640076> "
-        f"and awarded **{amount} XP**! <:Myne_kami_ni_inoriyo:946120160371171390>"
+        f"and has been awarded **{amount} XP**! <:Myne_kami_ni_inoriyo:946120160371171390>"
     )
