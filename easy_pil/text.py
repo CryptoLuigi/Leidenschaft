@@ -33,5 +33,6 @@ class Text:
         else:
             self.font = font
 
-    def getsize(self):
-        return self.font.getsize(self.text)
+    def getlength(self):
+        return self.font.getlength(self.text)
+
