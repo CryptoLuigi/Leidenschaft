@@ -26,6 +26,11 @@ class LevelingSlash(commands.Cog):
     def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot]):
         self.bot = bot
 
+    @staticmethod
+    def _can_manage_member_xp(interaction: Interaction) -> bool:
+        permissions = getattr(interaction.user, "guild_permissions", None)
+        return bool(permissions and permissions.moderate_members)
+
     @user_command(name="Rank User")
     async def rank_user(self, interaction: Interaction, member: Member):
         """Check rank of a user"""
@@ -246,8 +251,14 @@ class LevelingSlash(commands.Cog):
         )
 
     @slash_command(name="give-xp", description="Give XP to a user")
-    @application_checks.has_permissions(moderate_members=True)
     async def give_xp_command(self, interaction: Interaction, member: Member, amount: int):
+        if not self._can_manage_member_xp(interaction):
+            await interaction.response.send_message(
+                ephemeral=True,
+                content="You do not have permission to use this command.",
+            )
+            return
+
         if amount <= 0:
             await interaction.response.send_message(
                 ephemeral=True,
@@ -265,8 +276,14 @@ class LevelingSlash(commands.Cog):
         )
 
     @slash_command(name="remove-xp", description="Remove XP from a user")
-    @application_checks.has_permissions(moderate_members=True)
     async def remove_xp_command(self, interaction: Interaction, member: Member, amount: int):
+        if not self._can_manage_member_xp(interaction):
+            await interaction.response.send_message(
+                ephemeral=True,
+                content="You do not have permission to use this command.",
+            )
+            return
+
         if amount <= 0:
             await interaction.response.send_message(
                 ephemeral=True,
