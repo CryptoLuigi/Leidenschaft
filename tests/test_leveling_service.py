@@ -39,11 +39,22 @@ def test_build_leveling_state_clamps_negative_xp(load_source_module):
 def test_random_blessing_thresholds(load_source_module):
     service = load_source_module("test_leveling_service_blessing", "dislevel/leveling_service.py")
 
-    assert service.get_random_blessing_odds(0) == 5_000
-    assert service.get_random_blessing_odds(9) == 5_000
-    assert service.get_random_blessing_odds(10) == 1_000
-    assert service.get_random_blessing_odds(49) == 1_000
-    assert service.get_random_blessing_odds(50) == 500
+    assert service.get_random_blessing_odds(0) == 500
+    assert service.get_random_blessing_odds(49) == 500
+    assert service.get_random_blessing_odds(50) == 5_000
+    assert service.get_random_blessing_odds(100) == 5_000
+
+
+def test_random_blessing_xp_scales_with_level(load_source_module, monkeypatch):
+    service = load_source_module(
+        "test_leveling_service_blessing_xp", "dislevel/leveling_service.py"
+    )
+
+    monkeypatch.setattr(service.random, "randint", lambda start, end: 4_000)
+
+    assert service.get_random_blessing_xp(0) == 4_000
+    assert service.get_random_blessing_xp(20) == 8_000
+    assert service.get_random_blessing_xp(50) == 14_000
 
 
 @pytest.mark.asyncio

@@ -73,19 +73,17 @@ def build_leveling_state(total_xp: int) -> LevelingState:
 
 
 def get_random_blessing_odds(level: int) -> int:
-    if level < 10:
-        return 5_000
     if level < 50:
-        return 1_000
-    return 500
+        return 500
+    return 5_000
 
 
 def should_grant_random_blessing(level: int) -> bool:
     return random.randint(1, get_random_blessing_odds(level)) == 1
 
 
-def get_random_blessing_xp() -> int:
-    return random.randint(5_000, 10_000)
+def get_random_blessing_xp(level: int) -> int:
+    return int(random.randint(3_000, 7_000) * (1 + level / 20))
 
 
 async def sync_level_roles(guild: "Guild", member: "Member", level: int) -> None:

@@ -210,7 +210,7 @@ async def update_xp(
     )
 
     if should_grant_random_blessing(result["level"]):
-        blessing_amount = get_random_blessing_xp()
+        blessing_amount = get_random_blessing_xp(result["level"])
         blessing_result = await add_xp(
             bot,
             member_id,
